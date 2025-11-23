@@ -1,10 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const app = express();
-const port = 3000;
 require("dotenv").config();
-app.use(cors());
+
+const app = express();
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  })
+);
+
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.y9d5q6q.mongodb.net/?appName=Cluster0`;
@@ -21,7 +28,6 @@ let moviesCollection;
 
 async function run() {
   try {
-    // await client.connect();
     const db = client.db("movie-db");
     moviesCollection = db.collection("movies");
     console.log("Connected to MongoDB!");
@@ -40,7 +46,6 @@ app.get("/", async (req, res) => {
   }
 });
 
-//get all movies
 app.get("/movies", async (req, res) => {
   try {
     const { genres, minRating, maxRating } = req.query;
@@ -58,7 +63,7 @@ app.get("/movies", async (req, res) => {
   }
 });
 
-//featured movies for slides
+//hero movies
 app.get("/movies/featured", async (req, res) => {
   try {
     const movies = await moviesCollection.find().limit(5).toArray();
@@ -68,7 +73,7 @@ app.get("/movies/featured", async (req, res) => {
   }
 });
 
-//top-rated movies
+//top-rated
 app.get("/movies/top-rated", async (req, res) => {
   try {
     const topRated = await moviesCollection
@@ -88,13 +93,14 @@ app.get("/movies/:id", async (req, res) => {
     const { id } = req.params;
     const movie = await moviesCollection.findOne({ _id: new ObjectId(id) });
     if (!movie) return res.status(404).send({ message: "Movie not found" });
+
     res.send(movie);
   } catch (error) {
     res.status(500).send({ message: "Error fetching movie", error });
   }
 });
 
-//add movie
+// Add
 app.post("/movies/add", async (req, res) => {
   try {
     const movieData = req.body;
@@ -105,42 +111,49 @@ app.post("/movies/add", async (req, res) => {
   }
 });
 
-//update movie
+//update
 app.put("/movies/update/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
 
+    if (!updatedData.userId)
+      return res.status(400).send({ message: "User email is required" });
+
     const movie = await moviesCollection.findOne({ _id: new ObjectId(id) });
     if (!movie) return res.status(404).send({ message: "Movie not found" });
 
-    if (movie.addedBy !== updatedData.userId) {
+    if (movie.addedBy !== updatedData.userId)
       return res.status(403).send({ message: "Not authorized" });
-    }
+
     delete updatedData.addedBy;
+    delete updatedData.userId;
 
     await moviesCollection.updateOne(
       { _id: new ObjectId(id) },
       { $set: updatedData }
     );
+
     res.send({ message: "Movie updated" });
   } catch (error) {
     res.status(500).send({ message: "Error updating movie", error });
   }
 });
 
-//dlt movie
+//dlt
 app.delete("/movies/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { userId } = req.body;
 
+    if (!userId)
+      return res.status(400).send({ message: "User email is required" });
+
     const movie = await moviesCollection.findOne({ _id: new ObjectId(id) });
     if (!movie) return res.status(404).send({ message: "Movie not found" });
 
-    if (movie.addedBy !== userId) {
+    if (movie.addedBy !== userId)
       return res.status(403).send({ message: "Not authorized" });
-    }
 
     await moviesCollection.deleteOne({ _id: new ObjectId(id) });
     res.send({ message: "Movie deleted" });
@@ -149,18 +162,16 @@ app.delete("/movies/delete/:id", async (req, res) => {
   }
 });
 
-//my collection
 app.get("/movies/my-collection", async (req, res) => {
   try {
     const { userId } = req.query;
     const movies = await moviesCollection.find({ addedBy: userId }).toArray();
     res.send(movies);
   } catch (error) {
-    res.status(500).send({ message: "Error fetching your collection", error });
+    res.status(500).send({ message: "Error fetching collection", error });
   }
 });
 
-//user count
 app.get("/users", (req, res) => {
   const totalUsers = Math.floor(Math.random() * 451) + 50;
   res.send([{ totalUsers }]);
@@ -199,6 +210,6 @@ app.patch("/movies/:id/watchlist", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server is running!`);
-});
+module.exports = app;
+
+//some lines are added to solve the deploy related problem
