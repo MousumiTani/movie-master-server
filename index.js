@@ -40,12 +40,11 @@ app.get("/", async (req, res) => {
   }
 });
 
-// GET all movies
+//get all movies
 app.get("/movies", async (req, res) => {
   try {
     const { genres, minRating, maxRating } = req.query;
     const query = {};
-
     if (genres) query.genre = { $in: genres.split(",") };
     if (minRating)
       query.rating = { ...query.rating, $gte: parseFloat(minRating) };
@@ -59,7 +58,7 @@ app.get("/movies", async (req, res) => {
   }
 });
 
-// Featured movies for slides
+//featured movies for slides
 app.get("/movies/featured", async (req, res) => {
   try {
     const movies = await moviesCollection.find().limit(5).toArray();
