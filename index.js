@@ -68,7 +68,7 @@ app.get("/movies/featured", async (req, res) => {
   }
 });
 
-// top-rated movies
+//top-rated movies
 app.get("/movies/top-rated", async (req, res) => {
   try {
     const topRated = await moviesCollection
@@ -94,7 +94,7 @@ app.get("/movies/:id", async (req, res) => {
   }
 });
 
-// Addmovie
+//add movie
 app.post("/movies/add", async (req, res) => {
   try {
     const movieData = req.body;
@@ -105,7 +105,7 @@ app.post("/movies/add", async (req, res) => {
   }
 });
 
-// Updatemovie
+//update movie
 app.put("/movies/update/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -129,7 +129,7 @@ app.put("/movies/update/:id", async (req, res) => {
   }
 });
 
-// Delete movie
+//dlt movie
 app.delete("/movies/delete/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -149,7 +149,7 @@ app.delete("/movies/delete/:id", async (req, res) => {
   }
 });
 
-// my collection
+//my collection
 app.get("/movies/my-collection", async (req, res) => {
   try {
     const { userId } = req.query;
@@ -160,7 +160,7 @@ app.get("/movies/my-collection", async (req, res) => {
   }
 });
 
-// user count
+//user count
 app.get("/users", (req, res) => {
   const totalUsers = Math.floor(Math.random() * 451) + 50;
   res.send([{ totalUsers }]);
@@ -200,5 +200,5 @@ app.patch("/movies/:id/watchlist", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server is running!`);
 });
